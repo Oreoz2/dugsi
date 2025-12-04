@@ -14,8 +14,8 @@ NC='\033[0m' # No Color
 
 # Configuration
 PROJECT_NAME="madrasah-management-platform"
-BACKEND_DIR="madrasah-api"
-FRONTEND_DIR="madrasah-platform"
+BACKEND_DIR="dugsi-api"
+FRONTEND_DIR="dugsi-platform"
 DEPLOY_USER="madrasah"
 DEPLOY_PATH="/opt/madrasah"
 SERVICE_NAME="madrasah-api"
@@ -309,7 +309,7 @@ DEPLOY_PATH="/opt/madrasah"
 mkdir -p $BACKUP_DIR
 
 # Backup database
-cp $DEPLOY_PATH/madrasah-api/src/database/app.db $BACKUP_DIR/database_$DATE.db
+cp $DEPLOY_PATH/dugsi-api/src/database/app.db $BACKUP_DIR/database_$DATE.db
 
 # Backup configuration
 tar -czf $BACKUP_DIR/config_$DATE.tar.gz /etc/nginx/sites-available/madrasah.local /etc/supervisor/conf.d/madrasah-api.conf

@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id                String              @id @default(cuid())
+  name              String
+  slug              String              @unique // Subdomain, e.g., "school1"
+  logo              String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  users             User[]
+  students          Student[]
+  announcements     Announcement[]
+  attendanceRecords AttendanceRecord[]
+  progressRecords   ProgressRecord[]
+  feeRecords        FeeRecord[]
+  classes           Class[]
+
+  @@map("tenants")
+}
+
+model User {
+  id          String   @id @default(uuid())
+  tenantId    String
+  username    String
+  email       String
+  password    String   // Hashed
+  role        String   @default("user") // admin, principal, teacher, parent
+  fullName    String?
+  phone       String?
+  isActive    Boolean  @default(true)
+  lastLogin   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, username])
+  @@unique([tenantId, email])
+  @@map("users")
+}
+
+model Student {
+  id                  String   @id @default(uuid())
+  tenantId            String
+  studentId           String   // School specific ID
+  englishName         String
+  arabicName          String?
+  dateOfBirth         DateTime?
+  gender              String?
+  classLevel          String?
+  yearGroup           String?
+  enrollmentDate      DateTime @default(now())
+  status              String   @default("Active")
+  
+  // Contact
+  phone               String?
+  email               String?
+  address             String?
+  
+  // Guardian
+  guardianName        String?
+  guardianPhone       String?
+  guardianEmail       String?
+  guardianRelationship String?
+  
+  // Academic
+  quranProgress       Float    @default(0.0)
+  attendanceRate      Float    @default(0.0)
+  outstandingFees     Float    @default(0.0)
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  tenant              Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  attendanceRecords   AttendanceRecord[]
+  progressRecords     ProgressRecord[]
+  feeRecords          FeeRecord[]
+
+  @@unique([tenantId, studentId])
+  @@map("students")
+}
+
+model AttendanceRecord {
+  id          String   @id @default(uuid())
+  tenantId    String
+  studentId   String
+  date        DateTime
+  status      String   // Present, Absent, Late, Excused
+  notes       String?
+  markedBy    String?
+  createdAt   DateTime @default(now())
+
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("attendance_records")
+}
+
+model ProgressRecord {
+  id                  String   @id @default(uuid())
+  tenantId            String
+  studentId           String
+  subject             String
+  progressType        String   // Memorization, Recitation
+  currentLevel        String?
+  progressPercentage  Float    @default(0.0)
+  grade               String?
+  notes               String?
+  assessedBy          String?
+  assessmentDate      DateTime @default(now())
+  createdAt           DateTime @default(now())
+
+  tenant              Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  student             Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("progress_records")
+}
+
+model FeeRecord {
+  id              String   @id @default(uuid())
+  tenantId        String
+  studentId       String
+  feeType         String
+  amount          Float
+  dueDate         DateTime
+  paidAmount      Float    @default(0.0)
+  paymentDate     DateTime?
+  paymentMethod   String?
+  status          String   @default("Pending")
+  notes           String?
+  createdAt       DateTime @default(now())
+
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  student         Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("fee_records")
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  title     String
+  content   String
+  priority  String   @default("normal")
+  author    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("announcements")
+}
+
+model Class {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name        String
+  level       String
+  teacher     String
+  schedule    String?
+  capacity    Int      @default(20)
+  enrolled    Int      @default(0)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("classes")
+}

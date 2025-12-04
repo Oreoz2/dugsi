@@ -1,0 +1,23 @@
+{
+    "name": "@dugsi/database",
+    "version": "0.0.0",
+    "main": "./src/index.ts",
+    "types": "./src/index.ts",
+    "scripts": {
+        "build": "tsc",
+        "clean": "rm -rf dist .turbo node_modules",
+        "lint": "eslint .",
+        "db:generate": "prisma generate",
+        "db:push": "prisma db push",
+        "db:seed": "tsx seed.ts"
+    },
+    "dependencies": {
+        "@prisma/client": "^5.10.2"
+    },
+    "devDependencies": {
+        "prisma": "^5.10.2",
+        "typescript": "^5.3.3",
+        "@types/node": "^20.11.24",
+        "tsx": "^4.7.1"
+    }
+}
